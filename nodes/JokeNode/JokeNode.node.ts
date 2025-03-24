@@ -1,4 +1,4 @@
-import type {
+import {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
@@ -16,54 +16,14 @@ export class JokeNode implements INodeType {
 		group: ['transform'],
 		inputs: ['main'],
 		name: 'jokeNode',
+		icon: 'file:jokenode.svg',
 		outputs: ['main'],
 		properties: [
-			// First define the resource selection
-			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Joke',
-						value: 'joke',
-					},
-				],
-				default: 'joke',
-			},
-			// Then define operations for the joke resource
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-					},
-				},
-				options: [
-					{
-						name: 'Get',
-						value: 'get',
-						description: 'Get a random joke',
-						action: 'Get a random joke',
-					},
-				],
-				default: 'get',
-			},
-			// Category selection
+			// Category selection (required)
 			{
 				displayName: 'Joke Category',
 				name: 'category',
-				type: 'options',
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-						operation: ['get'],
-					},
-				},
+				type: 'multiOptions',
 				options: [
 					{
 						name: 'Any',
@@ -94,151 +54,126 @@ export class JokeNode implements INodeType {
 						value: 'Spooky',
 					},
 				],
-				default: 'Any',
+				default: ['Any'],
+				required: true,
+				description: 'The category of joke to get',
 			},
-			// Joke type
+			// Optional parameters
 			{
-				displayName: 'Joke Type',
-				name: 'type',
-				type: 'options',
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-						operation: ['get'],
-					},
-				},
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
 				options: [
+					// Joke type
 					{
-						name: 'Any',
-						value: 'Any',
+						displayName: 'Joke Type',
+						name: 'type',
+						type: 'options',
+						options: [
+							{
+								name: 'Any',
+								value: 'Any',
+							},
+							{
+								name: 'Single',
+								value: 'single',
+							},
+							{
+								name: 'Two Part',
+								value: 'twopart',
+							},
+						],
+						default: 'Any',
+						description: 'The type of joke to get',
+					},
+					// Language selection
+					{
+						displayName: 'Language',
+						name: 'language',
+						type: 'options',
+						options: [
+							{
+								name: 'Czech',
+								value: 'cs',
+							},
+							{
+								name: 'English',
+								value: 'en',
+							},
+							{
+								name: 'French',
+								value: 'fr',
+							},
+							{
+								name: 'German',
+								value: 'de',
+							},
+							{
+								name: 'Portuguese',
+								value: 'pt',
+							},
+							{
+								name: 'Spanish',
+								value: 'es',
+							},
+						],
+						default: 'en',
+						description: 'The language of the joke',
+					},
+					// Blacklist Flags (Multiple)
+					{
+						displayName: 'Blacklist Flags',
+						name: 'blacklistFlags',
+						type: 'multiOptions',
+						options: [
+							{
+								name: 'Explicit',
+								value: 'explicit',
+							},
+							{
+								name: 'NSFW',
+								value: 'nsfw',
+							},
+							{
+								name: 'Political',
+								value: 'political',
+							},
+							{
+								name: 'Racist',
+								value: 'racist',
+							},
+							{
+								name: 'Religious',
+								value: 'religious',
+							},
+							{
+								name: 'Sexist',
+								value: 'sexist',
+							},
+						],
+						default: [],
+						description: 'Flags to blacklist from the returned jokes',
 					},
 					{
-						name: 'Single',
-						value: 'single',
+						displayName: 'Safe Mode',
+						name: 'safeMode',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to enable safe mode by excluding all flags',
 					},
+					// Search string
 					{
-						name: 'Two Part',
-						value: 'twopart',
+						displayName: 'Search String',
+						name: 'searchString',
+						type: 'string',
+						default: '',
+						description: 'A search string to find jokes with',
 					},
 				],
-				default: 'Any',
-				description: 'The type of joke to get',
-			},
-			// Language selection
-			{
-				displayName: 'Language',
-				default: 'en',
-				description: 'The language of the joke',
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-						operation: ['get'],
-					},
-				},
-				name: 'language',
-				options: [
-					{
-						name: 'Czech',
-						value: 'cs',
-					},
-					{
-						name: 'English',
-						value: 'en',
-					},
-					{
-						name: 'French',
-						value: 'fr',
-					},
-					{
-						name: 'German',
-						value: 'de',
-					},
-					{
-						name: 'Portuguese',
-						value: 'pt',
-					},
-					{
-						name: 'Spanish',
-						value: 'es',
-					},
-				],
-				type: 'options',
-			},
-			// Blacklist Flags (Multiple)
-			{
-				displayName: 'Blacklist Flags',
-				name: 'blacklistFlags',
-				type: 'multiOptions',
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-						operation: ['get'],
-					},
-				},
-				options: [
-					{
-						name: 'Explicit',
-						value: 'explicit',
-					},
-					{
-						name: 'NSFW',
-						value: 'nsfw',
-					},
-					{
-						name: 'Political',
-						value: 'political',
-					},
-					{
-						name: 'Racist',
-						value: 'racist',
-					},
-					{
-						name: 'Religious',
-						value: 'religious',
-					},
-					{
-						name: 'Sexist',
-						value: 'sexist',
-					},
-				],
-				default: [],
-				description: 'Flags to blacklist from the returned jokes',
-			},
-			{
-				displayName: 'Safe Mode',
-				name: 'safeMode',
-				type: 'boolean',
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-						operation: ['get'],
-					},
-				},
-				default: false,
-				description: 'Whether to enable safe mode by excluding all flags',
-			},
-			// Search string
-			{
-				displayName: 'Search String',
-				name: 'searchString',
-				type: 'string',
-				displayOptions: {
-					show: {
-						resource: ['joke'],
-						operation: ['get'],
-					},
-				},
-				default: '',
-				description: 'A search string to find jokes with',
 			},
 		],
-		requestDefaults: {
-			baseURL: 'https://v2.jokeapi.dev',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-			},
-		},
 		version: 1,
 	};
 
@@ -246,58 +181,68 @@ export class JokeNode implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
-
 		// Process each input item
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
-				if (resource === 'joke' && operation === 'get') {
-					// Get all the parameters
-					const category = this.getNodeParameter('category', itemIndex) as string;
-					const language = this.getNodeParameter('language', itemIndex) as string;
-					const type = this.getNodeParameter('type', itemIndex) as string;
-					const blacklistFlags = this.getNodeParameter('blacklistFlags', itemIndex, []) as string[];
-					const safeMode = this.getNodeParameter('safeMode', itemIndex, false) as boolean;
-					const searchString = this.getNodeParameter('searchString', itemIndex, '') as string;
+				// Get the required category parameter
+				const categories = this.getNodeParameter('category', itemIndex, ['Any']) as string[];
 
-					// Build the URL and query parameters
-					let endpoint = `/joke/${category}`;
-					const queryParameters: Record<string, string | string[] | boolean> = {};
+				// Get optional parameters
+				const options = this.getNodeParameter('options', itemIndex, {}) as {
+					language?: string;
+					type?: string;
+					blacklistFlags?: string[];
+					safeMode?: boolean;
+					searchString?: string;
+				};
 
-					// Add parameters if they are set
-					if (language !== 'en') {
-						queryParameters.lang = language;
-					}
+				// Format the category for the URL
+				let categoryPath;
 
-					if (type !== 'Any') {
-						queryParameters.type = type;
-					}
-
-					if (blacklistFlags.length > 0) {
-						queryParameters.blacklistFlags = blacklistFlags.join(',');
-					}
-
-					if (safeMode) {
-						queryParameters.safe = true;
-					}
-
-					if (searchString) {
-						queryParameters.contains = searchString;
-					}
-
-					// Make the API request
-					const responseData = await this.helpers.httpRequest({
-						method: 'GET',
-						url: endpoint,
-						qs: queryParameters,
-						json: true,
-					});
-
-					returnData.push({
-						json: responseData,
-					});
+				// Handle 'Any' category or empty selection
+				if (categories.includes('Any')) {
+					categoryPath = 'Any';
+				} else {
+					// Join multiple categories with a comma for the API
+					categoryPath = categories.join(',');
 				}
+
+				// Build the URL and query parameters
+				const endpoint = `https://v2.jokeapi.dev/joke/${categoryPath}`;
+				const queryParameters: Record<string, string | boolean> = {};
+
+				// Add optional parameters if they are set
+				if (options.language && options.language !== 'en') {
+					queryParameters.lang = options.language;
+				}
+
+				if (options.type && options.type !== 'Any') {
+					queryParameters.type = options.type;
+				}
+
+				if (options.blacklistFlags && options.blacklistFlags.length > 0) {
+					queryParameters.blacklistFlags = options.blacklistFlags.join(',');
+				}
+
+				if (options.safeMode) {
+					queryParameters.safe = options.safeMode.toString();
+				}
+
+				if (options.searchString) {
+					queryParameters.contains = options.searchString;
+				}
+
+				// Make the API request
+				const responseData = await this.helpers.httpRequest({
+					method: 'GET',
+					url: endpoint,
+					qs: queryParameters,
+					json: true,
+				});
+
+				returnData.push({
+					json: responseData,
+				});
 			} catch (error) {
 				if (this.continueOnFail()) {
 					returnData.push({
